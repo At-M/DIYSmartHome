@@ -13,9 +13,9 @@ wifi:
 # Optional manual IP
 
   manual_ip:
-    static_ip: !secret ip-espoutdoor
-    gateway: !secret wifi-gw
-    subnet: !secret wifi-sn
+    static_ip: 192.123.123.123
+    gateway: 192.123.123.123
+    subnet: 255.255.255.255
 
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
