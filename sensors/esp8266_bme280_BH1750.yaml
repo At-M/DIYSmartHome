@@ -1,0 +1,76 @@
+substitutions:
+  sens_name: espoutdoor
+  
+esphome:
+  name: ${sens_name}
+  platform: ESP8266
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi-ssid
+  password: !secret wifi-pw
+ 
+# Optional manual IP
+
+  manual_ip:
+    static_ip: !secret ip-espoutdoor
+    gateway: !secret wifi-gw
+    subnet: !secret wifi-sn
+
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "${sens_name} Fallback Hotspot"
+    password: !secret fallback-wifi-pw
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret ha-api-pws
+
+ota:
+  password: !secret ha-api-pws
+  
+#deep_sleep:
+#  doesnt seem to work with an unmodded wemos d1 mini fake
+#  run_duration: 40s
+#  sleep_duration: 1min
+# Example configuration entry
+i2c:
+  sda: 4
+  scl: 5
+  scan: False
+  id: bus_a
+
+# Example configuration entry
+sensor:
+  - platform: bme280
+    temperature:
+      name: "${sens_name} Temperature"
+      id: ${sens_name}_temperature
+      oversampling: 16x
+    pressure:
+      name: "${sens_name} Pressure"
+      id: ${sens_name}_pressure
+    humidity:
+      name: "${sens_name} Humidity"
+      id: ${sens_name}_humidity
+    address: 0x76
+    update_interval: 300s
+  - platform: template
+    name: "Dew Point"
+    lambda: |-
+      return (243.5*(log(id(${sens_name}_humidity).state/100)+((17.67*id(${sens_name}_temperature).state)/
+      (243.5+id(${sens_name}_temperature).state)))/(17.67-log(id(${sens_name}_humidity).state/100)-
+      ((17.67*id(${sens_name}_temperature).state)/(243.5+id(${sens_name}_temperature).state))));
+    unit_of_measurement: °C
+    state_class: measurement
+    icon: 'mdi:thermometer-alert'
+    #BH1750
+  - platform: bh1750
+    name: '${sens_name} Illuminance'
+    address: 0x23
+    measurement_duration: 69
+    update_interval: 300s
